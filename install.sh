@@ -8,7 +8,7 @@ pip install sibus_lib
 
 SERVICE="sibus.media.player.service"
 
-SERVICE_ORG="./$SERVICE"
+SERVICE_ORG="`pwd`/$SERVICE"
 SERVICE_DST="/etc/init.d/$SERVICE"
 
 if [ ! -e $SERVICE_ORG ]; then
@@ -18,7 +18,7 @@ fi
 
 echo "Installing service $SERVICE"
 chmod 0755 $SERVICE_ORG
-if [ -e SERVICE_DST ]; then
+if [ -e $SERVICE_DST ]; then
     sudo unlink $SERVICE_DST
 fi
 sudo ln -s -v $SERVICE_ORG $SERVICE_DST
