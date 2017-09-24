@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import signal
 import sys
 import time
 
-sys.path.append(os.getenv('ALPIBUS_DIR', os.getcwd()))
+from sibus_lib import BusElement, MessageObject, sibus_init
+from sibus_lib.VoiceRSSWrapper import TextToSpeech, AudioPlayer
 
-from sibus_lib.lib import mylogger
-from sibus_lib.lib import BusElement, MessageObject
-
-from sibus_lib.lib.VoiceRSSWrapper import TextToSpeech, AudioPlayer
-
-SERVICE_NAME = "media.audio.player"
-logger = mylogger(SERVICE_NAME)
+SERVICE_NAME = "media.player"
+logger, cfg_data = sibus_init(SERVICE_NAME)
 
 def on_busmessage(message):
     logger.info(message)
