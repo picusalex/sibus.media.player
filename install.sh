@@ -6,7 +6,7 @@ sudo apt-get install mplayer
 
 pip install sibus_lib
 
-SERVICE="sibus.media.player"
+SERVICE="sibus.media.player.service"
 
 SERVICE_ORG="./$SERVICE"
 SERVICE_DST="/etc/init.d/$SERVICE"
