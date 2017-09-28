@@ -1,17 +1,13 @@
 [Unit]
 Description=Sibus MediaPlayer service
-#After=sibus-core.target
+After=sibus-core.target
 
 [Service]
-Type=forking
-
+Type=simple
 User=<USER>
 RuntimeDirectoryMode=770
-
-ExecStart=/usr/bin/python <SCRIPT_PATH>
-
+ExecStart=<SCRIPT_PATH>
 Restart=on-failure
-
 # Configures the time to wait before service is stopped forcefully.
 TimeoutStopSec=300
 

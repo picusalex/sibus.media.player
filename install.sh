@@ -4,9 +4,10 @@ SERVICE="sibus.mediaplayer"
 
 INSTALL_DIR=`pwd`
 SERVICE_PATH="$INSTALL_DIR/sibus.media.player.py"
+SYSTEMD_SERVICE="$SERVICE.service"
 SYSTEMD_ORG="$INSTALL_DIR/systemd-config"
-SYSTEMD_TMP="$INSTALL_DIR/$SERVICE.service"
-SYSTEMD_DST="/etc/systemd/system/$SERVICE.service"
+SYSTEMD_TMP="$INSTALL_DIR/$SYSTEMD_SERVICE"
+SYSTEMD_DST="/etc/systemd/system/$SYSTEMD_SERVICE"
 
 if [ ! -e $SERVICE_PATH ]; then
     echo " !!! ERROR: file $SERVICE_PATH not found !!!"
@@ -23,11 +24,12 @@ if [ "" == "$PKG_OK" ]; then
   sudo apt-get --force-yes --yes install mplayer
 fi
 
-sudo pip install --no-cache-dir sibus_lib
+sudo pip install --upgrade sibus_lib
 
 echo " # Patching service $SERVICE systemd config file..."
-sed 's|<SCRIPT_PATH>|'$SERVICE_PATH'|g' $SYSTEMD_ORG > $SYSTEMD_TMP
-sed 's|<USER>|'$USER'|g' $SYSTEMD_TMP > $SYSTEMD_TMP
+sed 's|<SCRIPT_PATH>|'$SERVICE_PATH'|g' $SYSTEMD_ORG > "/tmp/tmp.systemd"
+sed 's|<USER>|'$USER'|g' "/tmp/tmp.systemd" > $SYSTEMD_TMP
+echo " = systemd config: "
 cat $SYSTEMD_TMP
 
 echo " # Installing service $SERVICE"
@@ -35,12 +37,11 @@ sudo ln -sfv $SYSTEMD_TMP $SYSTEMD_DST
 sudo systemctl daemon-reload
 
 echo " # Enable & start service $SERVICE at boot"
-sudo systemctl enable $SERVICE
-sudo systemctl start $SERVICE
+sudo systemctl enable $SYSTEMD_SERVICE
+sudo systemctl start $SYSTEMD_SERVICE
 
 echo " # Service $SERVICE status"
-sudo systemctl status $SERVICE
-
+sudo systemctl status $SYSTEMD_SERVICE
 exit 0
 
 
