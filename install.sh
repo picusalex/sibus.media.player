@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 
-SERVICE="sibus-mediaplayer"
+SERVICE="sibus.mediaplayer"
 
 INSTALL_DIR=`pwd`
-SERVICE_ORG="$INSTALL_DIR/sibus.media.player.service"
-SERVICE_DST="/etc/init.d/$SERVICE"
+SERVICE_PATH="$INSTALL_DIR/sibus.media.player.py"
+SYSTEMD_ORG="$INSTALL_DIR/systemd-config"
+SYSTEMD_TMP="$INSTALL_DIR/$SERVICE.service"
+SYSTEMD_DST="/etc/systemd/system/$SERVICE.service"
 
-if [ ! -e $SERVICE_ORG ]; then
-    echo "ERROR: file $SERVICE_ORG not found !"
+if [ ! -e $SERVICE_PATH ]; then
+    echo " !!! ERROR: file $SERVICE_PATH not found !!!"
+    echo " (script must be run from its own directory !)"
     exit 1
 fi
+sudo chmod +x $SERVICE_PATH
 
-echo "Checking service $SERVICE dependencies"
+echo " # Checking service $SERVICE dependencies"
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' mplayer | grep "install ok installed")
 if [ "" == "$PKG_OK" ]; then
   echo "Installing mplayer"
@@ -21,18 +25,21 @@ fi
 
 sudo pip install --no-cache-dir sibus_lib
 
-echo "Patching service $SERVICE"
-sed -i 's|<INSTALL_DIR>|'$INSTALL_DIR'|g' $SERVICE_ORG
+echo " # Patching service $SERVICE systemd config file..."
+sed 's|<SCRIPT_PATH>|'$SERVICE_PATH'|g' $SYSTEMD_ORG > $SYSTEMD_TMP
+sed 's|<USER>|'$USER'|g' $SYSTEMD_TMP > $SYSTEMD_TMP
+cat $SYSTEMD_TMP
 
-echo "Installing service $SERVICE"
-chmod 0755 $SERVICE_ORG
-if [ -e $SERVICE_DST ]; then
-    sudo unlink $SERVICE_DST
-fi
-sudo ln -s -v $SERVICE_ORG $SERVICE_DST
+echo " # Installing service $SERVICE"
+sudo ln -sfv $SYSTEMD_TMP $SYSTEMD_DST
+sudo systemctl daemon-reload
 
-echo "Enable service $SERVICE at boot"
+echo " # Enable & start service $SERVICE at boot"
 sudo systemctl enable $SERVICE
+sudo systemctl start $SERVICE
+
+echo " # Service $SERVICE status"
+sudo systemctl status $SERVICE
 
 exit 0
 
