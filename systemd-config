@@ -6,6 +6,7 @@ After=sibus-core.target
 Type=simple
 User=<USER>
 ExecStart=<SCRIPT_PATH>
+WorkingDirectory=<SCRIPT_DIR>
 Restart=on-failure
 # Configures the time to wait before service is stopped forcefully.
 TimeoutStopSec=300

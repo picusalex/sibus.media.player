@@ -32,7 +32,8 @@ sudo pip install --upgrade sibus_lib
 
 echo " # Patching service $SERVICE systemd config file..."
 sed 's|<SCRIPT_PATH>|'$SERVICE_PATH'|g' $SYSTEMD_ORG > "/tmp/tmp.systemd"
-sed 's|<USER>|'$USER'|g' "/tmp/tmp.systemd" > $SYSTEMD_TMP
+sed 's|<SCRIPT_DIR>|'$INSTALL_DIR'|g' "/tmp/tmp.systemd" > "/tmp/tmp2.systemd"
+sed 's|<USER>|'$USER'|g' "/tmp/tmp2.systemd" > $SYSTEMD_TMP
 echo " = systemd config: "
 cat $SYSTEMD_TMP
 

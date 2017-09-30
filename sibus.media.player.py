@@ -7,6 +7,7 @@ import time
 
 from sibus_lib import BusElement, MessageObject, sibus_init
 from sibus_lib.VoiceRSSWrapper import TextToSpeech, AudioPlayer
+from sibus_lib.utils import exec_process
 
 SERVICE_NAME = "media.player"
 logger, cfg_data = sibus_init(SERVICE_NAME)
@@ -37,6 +38,8 @@ def on_busmessage(message):
             filepath = mp3file.create_mp3file(data["content"])
             mp3file.playfile(filepath)
 
+
+exec_process("./connect_bt.sh")
 
 busclient = BusElement(SERVICE_NAME, callback=on_busmessage, ignore_my_msg=False)
 busclient.register_topic("request.audio.tts")
