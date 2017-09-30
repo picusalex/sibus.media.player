@@ -7,7 +7,11 @@ SERVICE_PATH="$INSTALL_DIR/sibus.media.player.py"
 SYSTEMD_SERVICE="$SERVICE.service"
 SYSTEMD_ORG="$INSTALL_DIR/systemd-config"
 SYSTEMD_TMP="$INSTALL_DIR/$SYSTEMD_SERVICE"
-SYSTEMD_DST="/etc/systemd/system/$SYSTEMD_SERVICE"
+SYSTEMD_DST="/lib/systemd/system/$SYSTEMD_SERVICE"
+
+echo " # Update folder from git repository"
+git fetch origin master
+git reset --hard origin/master
 
 if [ ! -e $SERVICE_PATH ]; then
     echo " !!! ERROR: file $SERVICE_PATH not found !!!"
@@ -33,7 +37,7 @@ echo " = systemd config: "
 cat $SYSTEMD_TMP
 
 echo " # Installing service $SERVICE"
-sudo ln -sfv $SYSTEMD_TMP $SYSTEMD_DST
+sudo cp -fv $SYSTEMD_TMP $SYSTEMD_DST
 sudo systemctl daemon-reload
 
 echo " # Enable & start service $SERVICE at boot"
