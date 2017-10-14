@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import signal
 import sys
 import time
 
+from VoiceRSSWrapper import TextToSpeech, AudioPlayer
 from sibus_lib import BusElement, MessageObject, sibus_init
-from sibus_lib.VoiceRSSWrapper import TextToSpeech, AudioPlayer
 
 SERVICE_NAME = "media.player"
 logger, cfg_data = sibus_init(SERVICE_NAME)
@@ -26,19 +27,19 @@ def on_busmessage(message):
         filepath = tts.generateMP3()
 
         emit_msg = MessageObject(topic="request.audio.play", data={
-            "type": "file",
-            "filename": filepath,
-            "content": tts.get_mp3_data()
+            "type": "mp3.data",
+            "value": tts.get_mp3_data()
         })
         busclient.publish(emit_msg)
+        os.remove(filepath)
 
     if message.topic == "request.audio.play":
         data = message.get_data()
         logger.info("Received request for Play")
 
-        if data["type"] == "file":
+        if data["type"] == "mp3.data":
             mp3file = AudioPlayer()
-            filepath = mp3file.create_mp3file(data["content"])
+            filepath = mp3file.create_mp3file(data["value"])
             mp3file.playfile(filepath)
 
 
