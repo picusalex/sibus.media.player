@@ -22,7 +22,11 @@ sudo chmod +x $SERVICE_PATH
 
 
 echo " # Checking service $SERVICE dependencies"
-command -v pico2wave >/dev/null 2>&1 || { echo >&2 "Installing picoTTS"; sudo apt-get update; sudo apt-get --force-yes --yes install picostts}
+command -v pico2wave >/dev/null 2>&1 || {
+    echo >&2 "Installing picoTTS";
+    sudo apt-get update;
+    sudo apt-get --force-yes --yes install picostts;
+    }
 
 sudo pip install --upgrade sibus_lib
 
@@ -43,4 +47,5 @@ sudo systemctl start $SYSTEMD_SERVICE
 
 echo " # Service $SERVICE status"
 sudo systemctl status $SYSTEMD_SERVICE
+
 exit 0
