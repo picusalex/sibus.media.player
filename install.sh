@@ -29,6 +29,7 @@ command -v pico2wave >/dev/null 2>&1 || {
     }
 
 sudo pip install --upgrade sibus_lib
+echo $? || { echo "Error during sibus_lib installation"; exit 1; }
 
 echo " # Patching service $SERVICE systemd config file..."
 sed 's|<SCRIPT_PATH>|'$SERVICE_PATH'|g' $SYSTEMD_ORG > "/tmp/tmp.systemd"
