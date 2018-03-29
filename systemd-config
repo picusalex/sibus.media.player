@@ -1,6 +1,6 @@
 [Unit]
 Description=Sibus MediaPlayer service
-After=sibus-core.target
+After=mosquitto
 
 [Service]
 Type=simple

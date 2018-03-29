@@ -20,13 +20,9 @@ if [ ! -e $SERVICE_PATH ]; then
 fi
 sudo chmod +x $SERVICE_PATH
 
+
 echo " # Checking service $SERVICE dependencies"
-PKG_OK=$(dpkg-query -W --showformat='${Status}\n' mplayer | grep "install ok installed")
-if [ "" == "$PKG_OK" ]; then
-  echo "Installing mplayer"
-  sudo apt-get update
-  sudo apt-get --force-yes --yes install mplayer
-fi
+command -v pico2wave >/dev/null 2>&1 || { echo >&2 "Installing picoTTS"; sudo apt-get update; sudo apt-get --force-yes --yes install picostts}
 
 sudo pip install --upgrade sibus_lib
 
@@ -48,14 +44,3 @@ sudo systemctl start $SYSTEMD_SERVICE
 echo " # Service $SERVICE status"
 sudo systemctl status $SYSTEMD_SERVICE
 exit 0
-
-
-#### AUDIO BT INSTALL ############################################
-
-pulseaudio --start
-sleep 2
-echo -e "connect 08:DF:1F:8D:2B:C6 \nquit" | /usr/bin/bluetoothctl
-sleep 8
-pacmd set-default-sink bluez_sink.08_DF_1F_8D_2B_C6
-sleep3
-/etc/init.d/sibus.media.player.service restart

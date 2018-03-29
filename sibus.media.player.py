@@ -2,69 +2,61 @@
 # -*- coding: utf-8 -*-
 
 import os
-import signal
-import sys
+import socket
 import time
 
-from VoiceRSSWrapper import TextToSpeech, AudioPlayer
-from sibus_lib import BusElement, MessageObject, sibus_init
+from sibus_lib import BusClient, sibus_init
+from sibus_lib.utils import handle_signals, exec_process
 
 SERVICE_NAME = "media.player"
 logger, cfg_data = sibus_init(SERVICE_NAME)
 
-def on_busmessage(message):
-    logger.info(message)
 
-    if message.topic == "request.audio.tts":
-        data = message.get_data()
-        logger.info("Received request for TTS: '%s'"%data["tts"])
+def say(phrase):
+    logger.info("Received request for TTS: '%s'" % phrase)
 
-        try:
-            tts = TextToSpeech(data["tts"])
-        except Exception as e:
-            logger.error(e)
-            return
-        filepath = tts.generateMP3()
+    filepath = "/tmp/picotts.wav"
 
-        emit_msg = MessageObject(topic="request.audio.play", data={
-            "type": "mp3.data",
-            "value": tts.get_mp3_data()
-        })
-        busclient.publish(emit_msg)
-        os.remove(filepath)
+    try:
+        logger.info("Text to speach: %s" % phrase)
+        exec_process("/usr/bin/pico2wave -w %s -l fr-FR \"%s\"" % (filepath, phrase))
+    except Exception as e:
+        logger.error("Error while playing file: %s" % filepath)
+        return False
 
-    if message.topic == "request.audio.play":
-        data = message.get_data()
-        logger.info("Received request for Play")
+    try:
+        logger.info("Playing file: %s" % filepath)
+        exec_process("/usr/bin/aplay \"%s\"" % filepath)
+    except Exception as e:
+        logger.error("Error while playing file: %s" % filepath)
+        return False
 
-        if data["type"] == "mp3.data":
-            mp3file = AudioPlayer()
-            filepath = mp3file.create_mp3file(data["value"])
-            mp3file.playfile(filepath)
+    os.remove(filepath)
+    return True
+
+
+def on_busmessage(topic, payload):
+    logger.info(payload)
+
+    if topic.endswith("TTS"):
+        say(payload["value"])
 
 
 # exec_process("./connect_bt.sh")
 
-busclient = BusElement(SERVICE_NAME, callback=on_busmessage, ignore_my_msg=False)
-busclient.register_topic("request.audio.tts")
-busclient.register_topic("request.audio.play")
+busclient = BusClient(socket.getfqdn(), SERVICE_NAME, onmessage_cb=on_busmessage)
+busclient.mqtt_subscribe("sibus/+/TTS")
+
 busclient.start()
 
-def sigterm_handler(_signo=None, _stack_frame=None):
-    busclient.stop()
-    logger.info("Program terminated correctly")
-    sys.exit(0)
-
-signal.signal(signal.SIGTERM, sigterm_handler)
-
+handle_signals()
 try:
     while 1:
-        time.sleep(5)
-except (KeyboardInterrupt, SystemExit):
+        time.sleep(1)
+except (KeyboardInterrupt):
     logger.info("Ctrl+C detected !")
-except:
-    logger.error("Program terminated incorrectly ! ")
-    sys.exit(1)
-    pass
-
-sigterm_handler()
+except Exception as e:
+    logger.exception("Exception in program detected ! \n" + str(e))
+finally:
+    busclient.stop()
+    logger.info("Terminated !")
