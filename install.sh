@@ -28,8 +28,7 @@ command -v pico2wave >/dev/null 2>&1 || {
     sudo apt-get --force-yes --yes install picostts;
     }
 
-sudo pip install --upgrade sibus_lib
-echo $? || { echo "Error during sibus_lib installation"; exit 1; }
+sudo pip install --upgrade sibus_lib || { echo "Error during sibus_lib installation"; exit 1; }
 
 echo " # Patching service $SERVICE systemd config file..."
 sed 's|<SCRIPT_PATH>|'$SERVICE_PATH'|g' $SYSTEMD_ORG > "/tmp/tmp.systemd"
@@ -40,13 +39,13 @@ cat $SYSTEMD_TMP
 
 echo " # Installing service $SERVICE"
 sudo cp -fv $SYSTEMD_TMP $SYSTEMD_DST
-sudo systemctl daemon-reload
+sudo systemctl daemon-reload || { echo "Error during systemctl daemon-reload"; exit 1; }
 
 echo " # Enable & start service $SERVICE at boot"
-sudo systemctl enable $SYSTEMD_SERVICE
-sudo systemctl start $SYSTEMD_SERVICE
+sudo systemctl enable $SYSTEMD_SERVICE || { echo "Error during systemctl enable"; exit 1; }
+sudo systemctl start $SYSTEMD_SERVICE || { echo "Error during systemctl start"; exit 1; }
 
 echo " # Service $SERVICE status"
-sudo systemctl status $SYSTEMD_SERVICE
+sudo systemctl status $SYSTEMD_SERVICE || { echo "Error during systemctl status"; exit 1; }
 
 exit 0
