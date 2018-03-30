@@ -6,7 +6,7 @@ import socket
 import time
 
 from sibus_lib import BusClient, sibus_init
-from sibus_lib.utils import handle_signals, exec_process
+from sibus_lib.utils import handle_signals, exec_process, safe_string
 
 SERVICE_NAME = "media.player"
 logger, cfg_data = sibus_init(SERVICE_NAME)
@@ -18,10 +18,11 @@ def say(phrase):
     filepath = "/tmp/picotts.wav"
 
     try:
-        logger.info("Text to speach: %s" % phrase)
-        exec_process("/usr/bin/pico2wave -w %s -l fr-FR \"%s\"" % (filepath, phrase))
+        logger.info("Text to speech: %s" % phrase)
+        exec_process("/usr/bin/pico2wave -w %s -l fr-FR \"%s\"" % (filepath, safe_string(phrase)))
     except Exception as e:
-        logger.error("Error while playing file: %s" % filepath)
+        logger.error(" !! Error while encoding: '%s'" % (phrase))
+        logger.error("    Error: %s" % str(e))
         return False
 
     try:
