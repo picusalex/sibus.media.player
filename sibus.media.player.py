@@ -42,11 +42,21 @@ def on_busmessage(topic, payload):
     if topic.endswith("TTS"):
         say(payload["value"])
 
+    return True
+
+
+try:
+    volume = 95
+    logger.info("Set volume to : %d%%" % volume)
+    exec_process("/usr/bin/amixer sset 'PCM' %d%%" % volume)
+except Exception as e:
+    logger.warning(" !! Error while setting volume !")
+    logger.warning("    Error: %s" % str(e))
 
 # exec_process("./connect_bt.sh")
 
 busclient = BusClient(socket.getfqdn(), SERVICE_NAME, onmessage_cb=on_busmessage)
-busclient.mqtt_subscribe("sibus/+/TTS")
+busclient.mqtt_subscribe("sibus/action/multiroom/TTS")
 
 busclient.start()
 
